@@ -13,8 +13,8 @@ const getItemsList = [
 ];
 
 function createReceipt(items) {
-    const countItems = countItems(items);
-    const products = fillItems(countItems);
+    const countedItems = countItems(items);
+    const products = fillDetailedItems(countedItems, getItemsList);
     const total = caculateTotal(products);
     return generateReceipt(products, total);
 }
@@ -44,11 +44,10 @@ function findId(result, id) {
     }
     return -1;
 }
-function fillDetailedItems(countItems,getItemsList) {
+function fillDetailedItems(countItems, getItemsList) {
     let products = [];
     for (let i = 0; i < countItems.length; i++) {
         for (let j = 0; j < getItemsList.length; j++) {
-            // console.log(countItems[i]);
             if (getItemsList[j].id === countItems[i].id) {
                 products.push({
                     id: countItems[i].id,
@@ -59,36 +58,34 @@ function fillDetailedItems(countItems,getItemsList) {
             }
         }
 
-    }   
+    }
     return products;
 }
-var countItems=countItems(['0001', '0002', '0002']);
-// console.log(countItems);
-console.log(fillDetailedItems(countItems,getItemsList));
-// 返回getItemsList的index
-function getIndex(countItems, id) {
-    for (let i = 0; i < getItemsList.length; i++) {
-        if (getItemsList[i].id === id) {
-            return i;
-            // return true;
-        }
-    }
-    return -1;
-}
+
 // 计算总价
 function caculateTotal(products) {
-    let total=0;
-    for(let i=0;i<products.length;i++){
-        total+=products[i].count*products[i].price;
+    let total = 0;
+    for (let i = 0; i < products.length; i++) {
+        total += products[i].count * products[i].price;
     }
     return total;
 }
 
-var products=fillDetailedItems(countItems,getItemsList)
-console.log(caculateTotal(products));
-
 function generateReceipt(products, total) {
-
+    let title = `Receipts
+-----------------------------------------------
+`;
+    let tail = `-----------------------------------------------
+Price: ${total}
+    `;
+    let line = '';
+    for (let i = 0; i < products.length; i++) {
+        line += products[i].name+"\t\t\t"+products[i].price+"\t\t\t"+products[i].count+"\n";
+    }
+    let receipt = title + line + tail;
+    return receipt;
 }
-// getItems(['001','002']);
-// countItems(['001', '002', '002']);
+var items = ['0001', '0002', '0002'];
+console.log(createReceipt(items));
+// var  countItems=countItems(items);
+// console.log(countItems);
