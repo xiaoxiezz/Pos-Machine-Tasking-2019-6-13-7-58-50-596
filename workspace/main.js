@@ -1,117 +1,94 @@
 
-const getItemsList = () => [
-    {"id": "0001", "name": "Coca Cola", "price": 3},
-    {"id": "0002", "name": "Diet Coke", "price": 4},
-    {"id": "0003", "name": "Pepsi-Cola", "price": 5},
-    {"id": "0004", "name": "Mountain Dew", "price": 6},
-    {"id": "0005", "name": "Dr Pepper", "price": 7},
-    {"id": "0006", "name": "Sprite", "price": 8},
-    {"id": "0007", "name": "Diet Pepsi", "price": 9},
-    {"id": "0008", "name": "Diet Mountain Dew", "price": 10},
-    {"id": "0009", "name": "Diet Dr Pepper", "price": 11},
-    {"id": "0010", "name": "Fanta", "price": 12}
+const getItemsList = [
+    { "id": "0001", "name": "Coca Cola", "price": 3 },
+    { "id": "0002", "name": "Diet Coke", "price": 4 },
+    { "id": "0003", "name": "Pepsi-Cola", "price": 5 },
+    { "id": "0004", "name": "Mountain Dew", "price": 6 },
+    { "id": "0005", "name": "Dr Pepper", "price": 7 },
+    { "id": "0006", "name": "Sprite", "price": 8 },
+    { "id": "0007", "name": "Diet Pepsi", "price": 9 },
+    { "id": "0008", "name": "Diet Mountain Dew", "price": 10 },
+    { "id": "0009", "name": "Diet Dr Pepper", "price": 11 },
+    { "id": "0010", "name": "Fanta", "price": 12 }
 ];
 
-const isValidBarcodes = barcodes => {
-    const allItemsList = getItemsList();
-    for (let i = 0; i < barcodes.length; i++) {
-        for(let j=0;j<allItemsList.length;j++){
-            if(barcodes[i]==allItemsList[j].id){
-                break;
-            }
-            if(j==allItemsList.length-1){
-                return false;
-            }
+function createReceipt(items) {
+    const countItems = countItems(items);
+    const products = fillItems(countItems);
+    const total = caculateTotal(products);
+    return generateReceipt(products, total);
+}
+
+function countItems(items) {
+    let result = [];
+    for (let i = 0; i < items.length; i++) {
+        let index = findId(result, items[i]);
+        if (index !== -1) {
+            result[index].count++;
+        } else {
+            result.push({
+                id: items[i],
+                count: 1
+            });
         }
     }
-    return true;
+    // console.log(result);
+    return result;
 }
-
-const getBarcodesInformation = barcodes => {
-    const allItemsList = getItemsList();
-    const itemsList = [];
-    for (let i = 0; i < barcodes.length; i++) {
-        for(let j=0;j<allItemsList.length;j++){
-            if(barcodes[i]==allItemsList[j].id){
-                itemsList.push(
-                    {
-                        name:allItemsList[j].name,
-                        price:allItemsList[j].price,
-                        total:1
-                    });
-                break
-            }
+function findId(result, id) {
+    for (let index = 0; index < result.length; index++) {
+        if (result[index].id === id) {
+            return index;
+            // return true;
         }
     }
-    for(let i=0; i<itemsList.length-1;i++){
-        for(let j=1; j<itemsList.length; j++){
-            if(itemsList[i].name==itemsList[j].name&&i!=j){
-                itemsList[i].total=itemsList[i].total+1;
-                itemsList.splice(j,1);
+    return -1;
+}
+function fillDetailedItems(countItems,getItemsList) {
+    let products = [];
+    for (let i = 0; i < countItems.length; i++) {
+        for (let j = 0; j < getItemsList.length; j++) {
+            // console.log(countItems[i]);
+            if (getItemsList[j].id === countItems[i].id) {
+                products.push({
+                    id: countItems[i].id,
+                    count: countItems[i].count,
+                    name: getItemsList[j].name,
+                    price: getItemsList[j].price
+                });
             }
         }
+
+    }   
+    return products;
+}
+var countItems=countItems(['0001', '0002', '0002']);
+// console.log(countItems);
+console.log(fillDetailedItems(countItems,getItemsList));
+// 返回getItemsList的index
+function getIndex(countItems, id) {
+    for (let i = 0; i < getItemsList.length; i++) {
+        if (getItemsList[i].id === id) {
+            return i;
+            // return true;
+        }
     }
-    return itemsList;
+    return -1;
 }
-
-const settleItemsFromBarcodes = itemList=>{
-    let sum = 0;
-    for(let i=0; i<itemList.length; i++){
-        sum= sum+itemList[i].total*itemList[i].price
+// 计算总价
+function caculateTotal(products) {
+    let total=0;
+    for(let i=0;i<products.length;i++){
+        total+=products[i].count*products[i].price;
     }
-    return {sum:sum,itemList:itemList};
+    return total;
 }
 
-const renderTotal = sum=>{
-    let totalString =`------------------------------------------------------------
-Price: ${sum}`;
-    return totalString;
+var products=fillDetailedItems(countItems,getItemsList)
+console.log(caculateTotal(products));
+
+function generateReceipt(products, total) {
+
 }
-
-const renderTitle = ()=>{
-    let titleString =`Receipts
-------------------------------------------------------------`;
-    return titleString;
-}
-
-const renderItems = itemList=>{
-    let itemsString =``;
-    for(let i=0; i<itemList.length;i++){
-        itemsString= `${itemsString}
-        ${itemList[i].name}     ${itemList[i].price}      ${itemList[i].total}`;
-    }
-    return itemsString;
-}
-
-const renderReceipt=items=>{
-    let title = renderTitle();
-    let item=renderItems(items.itemList);
-    let total=renderTotal(items.sum);
-
-    let receipt = `${title}
-    ${item}
-${total}`;
-    // // console.log(total);
-    return receipt;
-}
-
-const printReceipt=barcodes=>{
-    if(isValidBarcodes(barcodes)){
-        let itemList = getBarcodesInformation(barcodes);
-        let items = settleItemsFromBarcodes(itemList);
-        let receipt = renderReceipt(items);
-        return receipt;
-    }else{
-        return `Error: can't find these barcodes id from database`;
-    }
-}
-
-exports.getItemsList = getItemsList;
-exports.isValidBarcodes = isValidBarcodes;
-exports.getBarcodesInformation = getBarcodesInformation;
-exports.settleItemsFromBarcodes = settleItemsFromBarcodes;
-exports.renderTotal = renderTotal;
-exports.renderTitle = renderTitle;
-exports.renderItems = renderItems;
-exports.renderReceipt = renderReceipt;
-exports.printReceipt = printReceipt;
+// getItems(['001','002']);
+// countItems(['001', '002', '002']);
